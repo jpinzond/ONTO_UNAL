@@ -1,0 +1,240 @@
+@prefix :      <https://jpinzond.github.io/ONTO_UNAL/ONTO_COLAP#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix geo:   <http://www.opengis.net/ont/geosparql#> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# =====================================================================
+# ONTO_COLAP - Ontología de Áreas protegidas de Colombia (versión mínima)
+# Repositorio: https://github.com/jpinzond/ONTO_UNAL
+# Ontology IRI : https://jpinzond.github.io/ONTO_UNAL/ONTO_COLAP
+# Namespace    : https://jpinzond.github.io/ONTO_UNAL/ONTO_COLAP#
+# Las clases y propiedades de GeoSPARQL y PROV-O se declaran aquí de forma
+# local para que el archivo cargue sin conexión. Más adelante puedes
+# importar las ontologías completas desde Protégé (Active ontology >
+# Ontology imports > Direct imports).
+# =====================================================================
+
+<https://jpinzond.github.io/ONTO_UNAL/ONTO_COLAP> a owl:Ontology ;
+    dcterms:title "ONTO_COLAP: Ontología de Áreas protegidas de Colombia"@es ;
+    rdfs:label "ONTO_COLAP"@es ;
+    dcterms:description "Ontología para representar mojones y segmentos de límite declarados en actos administrativos de áreas protegidas de Colombia, sus versiones de geometría por nivel de precisión y la proveniencia (misiones UAV, productos y procesos de extracción)."@es ;
+    rdfs:comment "Versión mínima para el piloto. Reutiliza GeoSPARQL y PROV-O."@es ;
+    dcterms:creator <https://github.com/jpinzond> ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    owl:versionInfo "0.1.0" .
+
+dcterms:title       a owl:AnnotationProperty .
+dcterms:description a owl:AnnotationProperty .
+dcterms:creator     a owl:AnnotationProperty .
+dcterms:license     a owl:AnnotationProperty .
+
+# ---------------------------------------------------------------------
+# Elementos externos reutilizados (declaración local mínima)
+# ---------------------------------------------------------------------
+geo:Feature   a owl:Class ; rdfs:label "Feature (GeoSPARQL)"@en .
+geo:Geometry  a owl:Class ; rdfs:label "Geometry (GeoSPARQL)"@en .
+
+geo:hasGeometry a owl:ObjectProperty ;
+    rdfs:label "hasGeometry (GeoSPARQL)"@en ;
+    rdfs:domain geo:Feature ;
+    rdfs:range  geo:Geometry .
+
+geo:asWKT a owl:DatatypeProperty ;
+    rdfs:label "asWKT (GeoSPARQL)"@en ;
+    rdfs:comment "En los datos, el valor se escribe como literal tipado geo:wktLiteral. Aquí el rango se deja como rdfs:Literal porque el razonador HermiT no soporta ese tipo de dato."@es ;
+    rdfs:domain geo:Geometry ;
+    rdfs:range  rdfs:Literal .
+
+prov:Entity   a owl:Class ; rdfs:label "Entity (PROV-O)"@en .
+prov:Activity a owl:Class ; rdfs:label "Activity (PROV-O)"@en .
+prov:Agent    a owl:Class ; rdfs:label "Agent (PROV-O)"@en .
+
+prov:wasGeneratedBy    a owl:ObjectProperty ; rdfs:label "wasGeneratedBy (PROV-O)"@en .
+prov:wasDerivedFrom    a owl:ObjectProperty ; rdfs:label "wasDerivedFrom (PROV-O)"@en .
+prov:used              a owl:ObjectProperty ; rdfs:label "used (PROV-O)"@en .
+prov:wasAssociatedWith a owl:ObjectProperty ; rdfs:label "wasAssociatedWith (PROV-O)"@en .
+
+# ---------------------------------------------------------------------
+# CLASES
+# ---------------------------------------------------------------------
+:ActoAdministrativo a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Acto administrativo"@es ;
+    rdfs:comment "Resolución o decreto de declaratoria (o de modificación) que describe el límite de un área protegida. Corresponde a la fuente administrativa (Source) en LADM_COL."@es .
+
+:Mojon a owl:Class ;
+    rdfs:subClassOf geo:Feature ;
+    rdfs:label "Mojón"@es ;
+    rdfs:comment "Punto de referencia del límite descrito en el acto administrativo (p. ej. Mojón No. 8)."@es .
+
+:SegmentoLimite a owl:Class ;
+    rdfs:subClassOf geo:Feature ;
+    rdfs:label "Segmento de límite"@es ;
+    rdfs:comment "Tramo del límite comprendido entre dos mojones, descrito por un accidente geográfico (río, quebrada, vía, curva de nivel, cuchilla, etc.)."@es .
+
+:VersionGeometria a owl:Class ;
+    rdfs:subClassOf geo:Geometry ;
+    rdfs:label "Versión de geometría"@es ;
+    rdfs:comment "Una de las geometrías conocidas de un mojón o segmento, con su nivel de precisión, incertidumbre y proveniencia. Nunca se sobrescribe una versión anterior."@es .
+
+:MisionUAV a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Misión UAV"@es ;
+    rdfs:comment "Misión de vuelo con UAV que generó uno o más productos fotogramétricos."@es .
+
+:ProductoUAV a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Producto UAV"@es ;
+    rdfs:comment "Ortomosaico, DSM, DTM, nube de puntos u otro producto derivado del procesamiento fotogramétrico."@es .
+
+:EquipoUAV a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Equipo UAV"@es ;
+    rdfs:comment "Plataforma y sensor utilizados en la misión (p. ej. DJI Phantom 4 Pro, cámara FC6310)."@es .
+
+:ProcesoExtraccion a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Proceso de extracción"@es ;
+    rdfs:comment "Actividad que produce una geometría a partir de un producto UAV o de un acto administrativo (digitalización manual, segmentación automática, espacialización del texto)."@es .
+
+:EstadoVerificacion a owl:Class ;
+    rdfs:label "Estado de verificación"@es ;
+    rdfs:comment "Vocabulario controlado para clasificar cada segmento. Clase cerrada con tres individuos."@es ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:oneOf ( :ValidadoUnoAUno :PendienteVerificacionCertificada :SinEvidenciaIdentificable )
+    ] .
+
+# Clases mutuamente excluyentes
+[] a owl:AllDisjointClasses ;
+   owl:members ( :ActoAdministrativo :Mojon :SegmentoLimite :VersionGeometria
+                 :MisionUAV :ProductoUAV :EquipoUAV :ProcesoExtraccion :EstadoVerificacion ) .
+
+# ---------------------------------------------------------------------
+# INDIVIDUOS (vocabulario controlado)
+# ---------------------------------------------------------------------
+:ValidadoUnoAUno a owl:NamedIndividual , :EstadoVerificacion ;
+    rdfs:label "Validado a 1:1"@es ;
+    rdfs:comment "Existe evidencia UAV certificada (con puntos de control) que permite validar el tramo a escala 1:1."@es .
+
+:PendienteVerificacionCertificada a owl:NamedIndividual , :EstadoVerificacion ;
+    rdfs:label "Pendiente de verificación certificada"@es ;
+    rdfs:comment "El tramo es identificable pero la evidencia disponible no tiene la precisión geométrica suficiente."@es .
+
+:SinEvidenciaIdentificable a owl:NamedIndividual , :EstadoVerificacion ;
+    rdfs:label "Sin evidencia identificable"@es ;
+    rdfs:comment "No se logró identificar el elemento declarado en ninguna fuente disponible."@es .
+
+[] a owl:AllDifferent ;
+   owl:distinctMembers ( :ValidadoUnoAUno :PendienteVerificacionCertificada :SinEvidenciaIdentificable ) .
+
+# ---------------------------------------------------------------------
+# PROPIEDADES DE OBJETO
+# ---------------------------------------------------------------------
+:definidoEnActo a owl:ObjectProperty ;
+    rdfs:label "definido en acto"@es ;
+    rdfs:comment "Vincula un mojón o segmento con el acto administrativo que lo describe."@es ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :Mojon :SegmentoLimite ) ] ;
+    rdfs:range  :ActoAdministrativo .
+
+:tieneMojonInicial a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "tiene mojón inicial"@es ;
+    rdfs:domain :SegmentoLimite ;
+    rdfs:range  :Mojon .
+
+:tieneMojonFinal a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "tiene mojón final"@es ;
+    rdfs:domain :SegmentoLimite ;
+    rdfs:range  :Mojon .
+
+:tieneVersionGeometria a owl:ObjectProperty ;
+    rdfs:label "tiene versión de geometría"@es ;
+    rdfs:comment "Un mojón o segmento puede tener varias versiones de geometría, cada una con su precisión y proveniencia."@es ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :Mojon :SegmentoLimite ) ] ;
+    rdfs:range  :VersionGeometria .
+
+:tieneEstadoVerificacion a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "tiene estado de verificación"@es ;
+    rdfs:domain :SegmentoLimite ;
+    rdfs:range  :EstadoVerificacion .
+
+# ---------------------------------------------------------------------
+# PROPIEDADES DE DATOS
+# ---------------------------------------------------------------------
+# Acto administrativo
+:numeroActo a owl:DatatypeProperty ;
+    rdfs:label "número del acto"@es ; rdfs:domain :ActoAdministrativo ; rdfs:range xsd:string .
+:tipoActo a owl:DatatypeProperty ;
+    rdfs:label "tipo de acto"@es ; rdfs:domain :ActoAdministrativo ; rdfs:range xsd:string .
+:fechaActo a owl:DatatypeProperty ;
+    rdfs:label "fecha del acto"@es ; rdfs:domain :ActoAdministrativo ; rdfs:range xsd:dateTime .
+
+# Mojón
+:numeroMojon a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "número de mojón"@es ; rdfs:domain :Mojon ; rdfs:range xsd:integer .
+:cotaDeclarada a owl:DatatypeProperty ;
+    rdfs:label "cota declarada (m.s.n.m.)"@es ; rdfs:domain :Mojon ; rdfs:range xsd:decimal .
+
+# Mojón o segmento (texto fuente y toponimia)
+:textoFuente a owl:DatatypeProperty ;
+    rdfs:label "texto fuente"@es ;
+    rdfs:comment "Fragmento literal del acto administrativo que describe el mojón o tramo."@es ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :Mojon :SegmentoLimite ) ] ; rdfs:range xsd:string .
+:toponimoDeclarado a owl:DatatypeProperty ;
+    rdfs:label "topónimo declarado"@es ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :Mojon :SegmentoLimite ) ] ; rdfs:range xsd:string .
+:estadoToponimia a owl:DatatypeProperty ;
+    rdfs:label "estado de la toponimia"@es ;
+    rdfs:comment "Valores sugeridos: resuelto, no_resuelto."@es ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :Mojon :SegmentoLimite ) ] ; rdfs:range xsd:string .
+
+# Segmento
+:tipoElemento a owl:DatatypeProperty ;
+    rdfs:label "tipo de elemento geográfico"@es ;
+    rdfs:comment "Valores sugeridos: rio, quebrada, via, curva_nivel, cuchilla, filo, otro."@es ;
+    rdfs:domain :SegmentoLimite ; rdfs:range xsd:string .
+:distanciaDeclaradaKm a owl:DatatypeProperty ;
+    rdfs:label "distancia declarada (km)"@es ; rdfs:domain :SegmentoLimite ; rdfs:range xsd:decimal .
+
+# Versión de geometría
+:nivelPrecision a owl:DatatypeProperty ;
+    rdfs:label "nivel de precisión (escala)"@es ;
+    rdfs:comment "Valores sugeridos: 1:100000, 1:25000, 1:1."@es ;
+    rdfs:domain :VersionGeometria ; rdfs:range xsd:string .
+:incertidumbreMetros a owl:DatatypeProperty ;
+    rdfs:label "incertidumbre posicional (m)"@es ; rdfs:domain :VersionGeometria ; rdfs:range xsd:decimal .
+:sistemaCoordenadas a owl:DatatypeProperty ;
+    rdfs:label "sistema de coordenadas"@es ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :VersionGeometria :ProductoUAV ) ] ; rdfs:range xsd:string .
+
+# Misión
+:fechaVuelo a owl:DatatypeProperty ;
+    rdfs:label "fecha de vuelo"@es ; rdfs:domain :MisionUAV ; rdfs:range xsd:dateTime .
+:numeroGCP a owl:DatatypeProperty ;
+    rdfs:label "número de puntos de control (GCP)"@es ; rdfs:domain :MisionUAV ; rdfs:range xsd:integer .
+
+# Producto
+:gsdCm a owl:DatatypeProperty ;
+    rdfs:label "GSD (cm/píxel)"@es ; rdfs:domain :ProductoUAV ; rdfs:range xsd:decimal .
+:rmseVerificacionM a owl:DatatypeProperty ;
+    rdfs:label "RMSE de verificación (m)"@es ; rdfs:domain :ProductoUAV ; rdfs:range xsd:decimal .
+:tipoProducto a owl:DatatypeProperty ;
+    rdfs:label "tipo de producto"@es ;
+    rdfs:comment "Valores sugeridos: ortomosaico, DSM, DTM, nube_puntos, malla_3D."@es ;
+    rdfs:domain :ProductoUAV ; rdfs:range xsd:string .
+
+# Equipo
+:modeloEquipo a owl:DatatypeProperty ;
+    rdfs:label "modelo del equipo"@es ; rdfs:domain :EquipoUAV ; rdfs:range xsd:string .
+:modeloCamara a owl:DatatypeProperty ;
+    rdfs:label "modelo de cámara"@es ; rdfs:domain :EquipoUAV ; rdfs:range xsd:string .
+
+# Proceso de extracción
+:metodoExtraccion a owl:DatatypeProperty ;
+    rdfs:label "método de extracción"@es ;
+    rdfs:comment "Valores sugeridos: manual, automatizado, espacializacion_texto."@es ;
+    rdfs:domain :ProcesoExtraccion ; rdfs:range xsd:string .
